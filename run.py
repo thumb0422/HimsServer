@@ -8,15 +8,27 @@
 @file: run.py
 @time: 2019-08-14 21:44
 """
-
-from flask import Flask, request,url_for, redirect
+import json
+from decimal import Decimal
+from flask import Flask, request,url_for, redirect,jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__)
 app.config.from_pyfile('config/devConfig.cfg')
+app.config['JSON_AS_ASCII'] = False
 db = SQLAlchemy(app)
 
+class DateEncoder(json.JSONEncoder):
+    def default(self,obj):
+        if isinstance(obj, datetime.datetime):
+            return obj.strftime('%Y-%m-%d %H:%M:%S')
+        elif isinstance(obj,datetime.date):
+            return obj.strftime("%Y-%m-%d")
+        elif isinstance(obj,Decimal):
+            return str(obj)
+        else:
+            return json.JSONEncoder.default(self,obj)
 
 class Todo(db.Model):
     __tablename__ = 'todos'
@@ -31,12 +43,38 @@ class Todo(db.Model):
         self.text = text
         self.done = False
         self.pub_date = datetime.utcnow()
+    def to_Json(self):
+        json_data = {
+            "title":self.title,
+            'text':self.text,
+            'done':self.done,
+            'desc':"我来了"
+        }
+        # return json.dumps(json_data,cls=DateEncoder) #有多余的 \ 返回
+        return json_data
 
+def rowToArray(rows):
+    d = []
+    for row in rows:
+        row_as_dict = dict(row)
+        resultDic = {}
+        for (k,v) in row_as_dict.items():
+            resultDic[str(k)] = str(v)
+        d.append(resultDic)
+    return d
 
 @app.route('/')
 def show_all():
-    return Todo.query.order_by(Todo.pub_date.desc()).all()
-
+    querys = Todo.query.order_by(Todo.pub_date.desc()).all()
+    results = []
+    for item in querys:
+        results.append(item.to_Json())
+    """
+    通过SQL查询返回json
+    querys = db.session.execute('select * from todos')
+    results = rowToArray(querys)
+    """
+    return jsonify({'datas':results})
 
 @app.route('/add', methods=['GET', 'POST'])
 def add():
