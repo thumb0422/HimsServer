@@ -9,26 +9,14 @@
 @time: 2019-08-14 21:44
 """
 import json
-from decimal import Decimal
 from flask import Flask, request,url_for, redirect,jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from tool.utility import rowToArray
 
 app = Flask(__name__)
-app.config.from_pyfile('config/devConfig.cfg')
-app.config['JSON_AS_ASCII'] = False
+app.config.from_pyfile('config/dev.cfg')
 db = SQLAlchemy(app)
-
-class DateEncoder(json.JSONEncoder):
-    def default(self,obj):
-        if isinstance(obj, datetime.datetime):
-            return obj.strftime('%Y-%m-%d %H:%M:%S')
-        elif isinstance(obj,datetime.date):
-            return obj.strftime("%Y-%m-%d")
-        elif isinstance(obj,Decimal):
-            return str(obj)
-        else:
-            return json.JSONEncoder.default(self,obj)
 
 class Todo(db.Model):
     __tablename__ = 'todos'
@@ -53,16 +41,6 @@ class Todo(db.Model):
         # return json.dumps(json_data,cls=DateEncoder) #有多余的 \ 返回
         return json_data
 
-def rowToArray(rows):
-    d = []
-    for row in rows:
-        row_as_dict = dict(row)
-        resultDic = {}
-        for (k,v) in row_as_dict.items():
-            resultDic[str(k)] = str(v)
-        d.append(resultDic)
-    return d
-
 @app.route('/')
 def show_all():
     querys = Todo.query.order_by(Todo.pub_date.desc()).all()
@@ -70,7 +48,7 @@ def show_all():
     for item in querys:
         results.append(item.to_Json())
     """
-    通过SQL查询返回json
+    #通过SQL查询返回json
     querys = db.session.execute('select * from todos')
     results = rowToArray(querys)
     """
