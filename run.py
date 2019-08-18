@@ -78,13 +78,14 @@ def show_all():
 
 @app.route('/add', methods=['GET', 'POST'])
 def add():
+    data = request.get_json()
     if request.method == 'POST':
-        if not request.form['title']:
+        if not data['title']:
             pass
-        elif not request.form['text']:
+        elif not data['text']:
             pass
         else:
-            todo = Todo(request.form['title'], request.form['text'])
+            todo = Todo(data['title'], data['text'])
             db.session.add(todo)
             db.session.commit()
 
@@ -95,7 +96,7 @@ def add():
 @app.route('/update', methods=['POST'])
 def update_done():
     for todo in Todo.query.all():
-        todo.done = ('done.%d' % todo.id) in request.form
+        todo.done = ('done.%d' % todo.id) in request.get_json()
     db.session.commit()
     return redirect(url_for('show_all'))
 
