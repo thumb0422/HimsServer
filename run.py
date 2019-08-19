@@ -33,9 +33,11 @@ class Todo(db.Model):
         self.pub_date = datetime.utcnow()
     def to_Json(self):
         json_data = {
+            "id":self.id,
             "title":self.title,
             'text':self.text,
             'done':self.done,
+            'pub_date':self.pub_date,#需要格式化
             'desc':"我来了"
         }
         # return json.dumps(json_data,cls=DateEncoder) #有多余的 \ 返回
@@ -54,21 +56,33 @@ def show_all():
     """
     return jsonify({'datas':results})
 
+@app.route('/get',methods = ['GET','POST'])
+def show_index():
+    if request.method == 'POST':
+        data = request.get_json()
+        if data.get('id'):
+            querys = Todo.query.filter_by(id=data.get('id'))
+            results = []
+            for item in querys:
+                results.append(item.to_Json())
+            return jsonify({'datas':results})
+        else:
+            return jsonify({'status':-1})
+    return jsonify({'status':-1})
+
 @app.route('/add', methods=['GET', 'POST'])
 def add():
-    data = request.get_json()
     if request.method == 'POST':
-        if not data['title']:
-            pass
-        elif not data['text']:
+        data = request.get_json()
+        if (not data.get('title'))  or (not data.get('text')):
             pass
         else:
-            todo = Todo(data['title'], data['text'])
+            todo = Todo(data.get('title'), data.get('text'))
             db.session.add(todo)
             db.session.commit()
 
             return redirect(url_for('show_all'))
-    return
+    return jsonify({'status':-1})
 
 
 @app.route('/update', methods=['POST'])
