@@ -10,7 +10,7 @@ from api import db,app
 
 class Todo(db.Model):
     __tablename__ = 'todos'
-    __table_args__ = {"useexisting": True}
+    __table_args__ = {"extend_existing": True}
     id = db.Column('todo_id', db.Integer, primary_key=True)
     title = db.Column(db.String(60))
     text = db.Column(db.String)
