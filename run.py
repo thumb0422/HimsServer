@@ -15,4 +15,4 @@ from api import api as apiBP
 app.register_blueprint(apiBP,url_prefix='/api')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=8081)
