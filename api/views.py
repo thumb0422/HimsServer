@@ -49,7 +49,8 @@ def add():
             db.session.add(todo)
             db.session.commit()
 
-            return redirect(url_for('api.show_all'))
+            # return redirect(url_for('api.show_all')) #todo:uwsgi 无法返回redirect数据
+            return jsonify({'status':0})
     return jsonify({'status':-1})
 
 
