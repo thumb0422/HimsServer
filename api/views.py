@@ -5,11 +5,12 @@
 # @Time    : 2019-08-19 14:21
 # @Author  : thumb0422@163.com
 
-from flask import request,url_for, redirect,jsonify
-from . import db,api
+from flask import request, url_for, redirect, jsonify
+from . import db, api
 from .models import Todo
 
-@api.route('/',methods = ['GET'])
+
+@api.route('/', methods=['GET'])
 def show_all():
     querys = Todo.query.order_by(Todo.pub_date.desc()).all()
     results = []
@@ -21,9 +22,10 @@ def show_all():
     from tool.utility import rowToArray
     results = rowToArray(querys)
     """
-    return jsonify({'datas':results})
+    return jsonify({'datas': results})
 
-@api.route('/get',methods = ['GET','POST'])
+
+@api.route('/get', methods=['GET', 'POST'])
 # @api.route('/get/',methods = ['GET','POST'])
 def show_index():
     if request.method == 'POST':
@@ -33,25 +35,26 @@ def show_index():
             results = []
             for item in querys:
                 results.append(item.to_Json())
-            return jsonify({'datas':results})
+            return jsonify({'datas': results})
         else:
-            return jsonify({'status':-1})
-    return jsonify({'status':-1})
+            return jsonify({'status': -1})
+    return jsonify({'status': -1})
+
 
 @api.route('/add', methods=['GET', 'POST'])
 def add():
     if request.method == 'POST':
         data = request.get_json()
-        if (not data.get('title'))  or (not data.get('text')):
+        if (not data.get('title')) or (not data.get('text')):
             pass
         else:
             todo = Todo(data.get('title'), data.get('text'))
             db.session.add(todo)
             db.session.commit()
 
-            # return redirect(url_for('api.show_all')) #todo:uwsgi 无法返回redirect数据
-            return jsonify({'status':0})
-    return jsonify({'status':-1})
+            # return redirect(url_for('api.show_all')) #todo: uwsgi 无法返回redirect数据
+            return jsonify({'status': 0})
+    return jsonify({'status': -1})
 
 
 @api.route('/update', methods=['POST'])
@@ -61,8 +64,9 @@ def update_done():
     db.session.commit()
     return redirect(url_for('api.show_all'))
 
+
 @api.route('/delete', methods=['POST'])
-def deleteAll():
+def deleteall():
     Todo.query.delete()
     db.session.commit()
     return redirect(url_for('api.show_all'))
