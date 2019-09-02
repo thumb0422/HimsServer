@@ -6,7 +6,8 @@
 # @Author  : thumb0422@163.com
 
 from datetime import datetime
-from api import db,app
+from api import db
+
 
 class Todo(db.Model):
     __tablename__ = 'todos'
@@ -22,16 +23,12 @@ class Todo(db.Model):
         self.text = text
         self.done = False
         self.pub_date = datetime.utcnow()
+
     def to_Json(self):
-        json_data = {
-            "id":self.id,
-            "title":self.title,
-            'text':self.text,
-            'done':self.done,
-            'pub_date':self.pub_date,#需要格式化
-            'desc':"我来了"
-        }
+        json_data = {'id': self.id, 'title': self.title, 'text': self.text, 'done': self.done,
+                     'pub_date': self.pub_date, 'desc': "我来了"}
         # return json.dumps(json_data,cls=DateEncoder) #有多余的 \ 返回
         return json_data
+
 
 db.create_all()
